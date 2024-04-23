@@ -1,0 +1,106 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+@model List<ApplicationUser>
+<partial name="_Notification" />
+
+<head>
+    <style>
+        p {
+            margin: 0 auto;
+        }
+
+        .thead {
+            background-color: #FFCC00;
+            text-align: center;
+            
+        }
+
+        .tbody {
+            text-align: center;
+        }
+
+        .tbody tr:nth-child(odd) { /* odd: số lẻ, even: số chẳn */
+            background-color: #f2f2f2;
+        }
+
+        .tbody tr td {
+            vertical-align: middle;
+        }
+
+        .tbody tr .td-status {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+    </style>
+</head>
+
+<h1>List of Users</h1>
+
+<table class="table table-bordered">
+    <a asp-area="Identity" asp-page="/Account/CreateAccountE" class="btn btn-success mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+        </svg> Create New Account
+    </a>
+    @* <a asp-controller="Users" asp-action="Create" class="btn btn-success"><i class="bi bi-plus-lg"></i> Create New Account</a> *@
+    <thead class="thead">
+        <tr>
+            <th>Email</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>City</th>
+            <th>Status</th>
+            <th>Role</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="tbody">
+        @foreach (var user in Model)
+        {
+            var userRole = await UserManager.GetRolesAsync(user);
+            <tr>
+                <td>@user.Email</td>
+                <td style="font-weight: 600;">@user.Name</td>
+                <td>@user.Address</td>
+                <td>@user.City</td>
+                <td class="td-status">
+                    @(user.Status ? "Active" : "Inactive")
+                    @if (user.Status)
+                    {
+                        <form asp-controller="Users" asp-action="ToggleStatus" method="post">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-warning">Disable</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-controller="Users" asp-action="ToggleStatus" method="post">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-primary">Enable</button>
+                        </form>
+                    }
+                </td>
+                <td>
+                    @if (userRole.Contains("Admin"))
+                    {
+                        <p>Admin</p>
+                    } 
+                    else if (userRole.Contains("Employer")) {
+                        <p>Employer</p>
+                    }
+                    else if (userRole.Contains("JobSeeker"))
+                    {
+                        <p>Job Seeker</p>
+                    }
+                </td>
+                @* <td>@userRole</td> *@
+                <td>
+                    @* <button class="btn btn-danger delete-button" data-id="@user.Id">Delete</button> *@
+                    <a class="btn btn-danger" asp-controller="Users" asp-action="Delete" asp-route-id=@user.Id>Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

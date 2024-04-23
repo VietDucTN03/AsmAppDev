@@ -1,0 +1,148 @@
+﻿@model List<Category>	
+<partial name="_Notification"/>
+<head>
+    <style>
+        p {
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        thead {
+            background-color: #FFCC00;
+            text-align: center;
+        }
+
+        tbody {
+            text-align: center;
+        }
+
+        tbody tr:nth-child(odd) { /* odd: số lẻ, even: số chẳn */
+            background-color: #f2f2f2;
+        }
+
+        tbody tr td {
+            vertical-align: middle;
+        }
+
+        tbody tr .td-availability {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .btn-notification {
+            position: relative;
+
+            .not-number {
+            background-color: #FF0033;
+            font-size: 12px;
+            padding: 0px 6px;
+            border-radius: 50%;
+            position: absolute;
+            margin: -15px 3px;
+            }
+        }
+
+        .notification-status:hover {
+            background-color: #DDDDDD;
+            border-radius: 10px;
+        }
+
+        .form-notification {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-close {
+            font-weight: 600;
+        }
+
+        .btn-close:hover {
+            background-color: #FF0033;
+            
+        }
+        
+    </style>
+</head>
+
+<div class="header">
+    <h1>List of Category</h1>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-notification" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Notification <span class="not-number">@Model.Count(c => c.Availability && !c.NotificationStatus)</span>
+    </button>
+</div>
+
+<hr />
+
+<table class="table table-bordered">
+    <a asp-controller="Category" asp-action="Create" class="btn btn-success mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16" style="margin-bottom: 2px;">
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+        </svg> Add New Category
+    </a>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date Create</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model.Where(c => c.Availability))
+        // Phương thức Where sử dụng để lọc ra các obj Category trong Model có thuộc tính Availability là true
+        {
+            <tr>
+                <td style="font-weight: 600;">@category.Name</td>
+                <td>@category.DateCreate</td>
+                <td>
+                    <a asp-controller="Category" asp-action="Edit" asp-route-id="@category.Id" class="btn btn-primary">Edit</a>
+                    <a asp-controller="Category" asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-4" id="exampleModalLabel">Notification</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @foreach (var category in Model.Where(c => c.Availability))
+                {
+                    @if (category.Availability && !category.NotificationStatus)
+                    {
+                        <div>
+                            @if (!category.NotificationStatus)
+                            {
+                                <div class="notification-status">
+                                    <form asp-controller="Category" asp-action="ToggleNotification" method="post" class="form-notification">
+                                        <div class="notification-content">
+                                            Category <strong>@category.Name</strong> has been confirmed.
+                                            <input type="hidden" name="id" value="@category.Id" />
+                                        </div>
+                                        <button type="submit" class="btn-close"></button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
