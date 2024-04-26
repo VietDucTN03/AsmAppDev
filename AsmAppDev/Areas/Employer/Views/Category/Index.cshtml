@@ -12,6 +12,31 @@
             align-items: center;
         }
 
+        .btn-new-category {
+            position: relative;
+        }
+
+        .btn-new-category:hover::after {
+            content: "Add New Category";
+            position: absolute;
+            bottom: 0%;
+            left: 100%;
+            background-color: rgba(0, 0, 0, 0.15);
+            border: 1px solid #CCCCCC;
+            margin: 3px 10px;
+            padding: 5px 20px;
+            width: 142px;
+            border-radius: 5px;
+            z-index: 999;
+            color: #FFF;
+            font-size: 12px;
+        }
+
+        .manager-category {
+            display: flex;
+            justify-content: space-between;
+        }
+
         thead {
             background-color: #FFCC00;
             text-align: center;
@@ -37,14 +62,28 @@
 
         .btn-notification {
             position: relative;
-
-            .not-number {
-            background-color: #FF0033;
-            font-size: 12px;
-            padding: 0px 6px;
             border-radius: 50%;
-            position: absolute;
-            margin: -15px 3px;
+            
+            .not-number {
+                background-color: #FF0033;
+                font-size: 12px;
+                padding: 0px 6px;
+                border-radius: 50%;
+                position: absolute;
+                margin: -12px 0px;
+            }
+        }
+
+        .btn-waiting {
+            position: relative;
+
+            .waiting-number {
+                background-color: #FF0033;
+                font-size: 12px;
+                padding: 0px 6px;
+                border-radius: 50%;
+                position: absolute;
+                margin: -15px 17px;
             }
         }
 
@@ -67,26 +106,64 @@
             background-color: #FF0033;
             
         }
-        
+
+        .dropdown-menu {
+            width: 125%;
+            padding: 5px 10px;
+        }
+
+        .waiting-status {
+            margin: 5px 0px;
+            border-radius: 5px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .waiting-status:hover {
+            box-shadow: 0 5px 8px rgba(65, 105, 225, 0.4);
+        }
+
+        .waiting-content {
+            padding: 5px 10px;
+        }
+
     </style>
 </head>
 
 <div class="header">
     <h1>List of Category</h1>
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary btn-notification" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Notification <span class="not-number">@Model.Count(c => c.Availability && !c.NotificationStatus)</span>
+    <button type="button" class="btn btn-outline-primary btn-notification" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <i class="bi bi-bell"></i> <span class="not-number text-white">@Model.Count(c => c.Availability && !c.NotificationStatus)</span>
     </button>
 </div>
 
 <hr />
 
 <table class="table table-bordered">
-    <a asp-controller="Category" asp-action="Create" class="btn btn-success mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16" style="margin-bottom: 2px;">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-        </svg> Add New Category
-    </a>
+    <div class="manager-category">
+        <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-new-category mb-3">
+            <i class="bi bi-bookmark-plus"></i>
+        </a>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle btn-waiting" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Category is awaiting review <span class="waiting-number text-white">@Model.Count(c => !c.Availability && !c.NotificationStatus)</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end">
+                @foreach (var categoryWaiting in Model.Where(c => !c.Availability))  // Ava là false
+                {
+                    @if (!categoryWaiting.NotificationStatus)  // Notifi là false
+                    {
+                        <div class="waiting-status">
+                            <div class="waiting-content">
+                                Category <strong class="text-primary">@categoryWaiting.Name</strong> is awaiting confirmation.
+                                <input type="hidden" name="id" value="@categoryWaiting.Id" />
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
     <thead>
         <tr>
             <th>Name</th>
@@ -102,8 +179,8 @@
                 <td style="font-weight: 600;">@category.Name</td>
                 <td>@category.DateCreate</td>
                 <td>
-                    <a asp-controller="Category" asp-action="Edit" asp-route-id="@category.Id" class="btn btn-primary">Edit</a>
-                    <a asp-controller="Category" asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger">Delete</a>
+                    <a asp-controller="Category" asp-action="Edit" asp-route-id="@category.Id" class="btn btn-outline-primary">Edit</a>
+                    <a asp-controller="Category" asp-action="Delete" asp-route-id="@category.Id" class="btn btn-outline-danger">Delete</a>
                 </td>
             </tr>
         }
@@ -119,23 +196,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @foreach (var category in Model.Where(c => c.Availability))
+                @foreach (var category in Model.Where(c => c.Availability))  // Ava là true
                 {
-                    @if (category.Availability && !category.NotificationStatus)
+                    @if (!category.NotificationStatus)  // Notifi là false
                     {
-                        <div>
-                            @if (!category.NotificationStatus)
-                            {
-                                <div class="notification-status">
-                                    <form asp-controller="Category" asp-action="ToggleNotification" method="post" class="form-notification">
-                                        <div class="notification-content">
-                                            Category <strong>@category.Name</strong> has been confirmed.
-                                            <input type="hidden" name="id" value="@category.Id" />
-                                        </div>
-                                        <button type="submit" class="btn-close"></button>
-                                    </form>
+                        <div class="notification-status">
+                            <form asp-controller="Category" asp-action="ToggleNotification" method="post" class="form-notification">
+                                <div class="notification-content">
+                                    Category <strong>@category.Name</strong> has been confirmed.
+                                    <input type="hidden" name="id" value="@category.Id" />
                                 </div>
-                            }
+                                <button type="submit" class="btn-close"></button>
+                            </form>
                         </div>
                     }
                 }
