@@ -35,7 +35,6 @@
             font-size: 12px;
         }
 
-
         .tbody {
             text-align: center;
         }
@@ -104,14 +103,14 @@
                 <td>
                     @if (userRole.Contains("Admin"))
                     {
-                        <p>Admin</p>
+                        <p class="text-secondary fw-light">Admin</p>
                     } 
                     else if (userRole.Contains("Employer")) {
-                        <p>Employer</p>
+                        <p class="text-primary fw-normal">Employer</p>
                     }
                     else if (userRole.Contains("JobSeeker"))
                     {
-                        <p>Job Seeker</p>
+                        <p class="text-success fw-normal">Job Seeker</p>
                     }
                 </td>
                 @* <td>@userRole</td> *@

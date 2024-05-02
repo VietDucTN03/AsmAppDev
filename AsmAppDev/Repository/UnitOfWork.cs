@@ -10,11 +10,13 @@ namespace AsmAppDev.Repository
         public ICategoryRepository CategoryRepository { get; private set; }
         public IJobRepository JobRepository { get; private set; }
         public IAppUserRepository AppUserRepository { get; private set; }
+        public IJobApplicationRepository JobApplicationRepository { get; private set; }
         public UnitOfWork(ApplicationDBContext dbContext)
         {
             _dbContext = dbContext;
             CategoryRepository = new CategoryRepository(dbContext);
             JobRepository = new JobRepository(dbContext);
+            JobApplicationRepository = new JobApplicationRepository(dbContext);
             AppUserRepository = new AppUserRepository(dbContext);
         }
         public void Save()

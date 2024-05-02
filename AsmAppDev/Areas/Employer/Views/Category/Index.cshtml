@@ -32,11 +32,6 @@
             font-size: 12px;
         }
 
-        .manager-category {
-            display: flex;
-            justify-content: space-between;
-        }
-
         thead {
             background-color: #FFCC00;
             text-align: center;
@@ -140,28 +135,33 @@
 <hr />
 
 <table class="table table-bordered">
-    <div class="manager-category">
+    <div class="d-flex justify-content-between align-items-baseline">
         <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-new-category mb-3">
             <i class="bi bi-bookmark-plus"></i>
         </a>
         <div class="dropdown">
-            <button class="btn btn-outline-secondary dropdown-toggle btn-waiting" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Category is awaiting review <span class="waiting-number text-white">@Model.Count(c => !c.Availability && !c.NotificationStatus)</span>
-            </button>
-            <div class="dropdown-menu dropdown-menu-end">
-                @foreach (var categoryWaiting in Model.Where(c => !c.Availability))  // Ava là false
-                {
-                    @if (!categoryWaiting.NotificationStatus)  // Notifi là false
+            @if(Model.Count(c => !c.Availability) == 0)
+            {
+                <div class="text-danger fw-bold">No categories waiting!!</div>
+            } else {
+                <button class="btn btn-outline-secondary dropdown-toggle btn-waiting" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Category is awaiting review <span class="waiting-number text-white">@Model.Count(c => !c.Availability)</span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end">
+                    @foreach (var categoryWaiting in Model.Where(c => !c.Availability))  // Ava là false
                     {
-                        <div class="waiting-status">
-                            <div class="waiting-content">
-                                Category <strong class="text-primary">@categoryWaiting.Name</strong> is awaiting confirmation.
-                                <input type="hidden" name="id" value="@categoryWaiting.Id" />
+                        @if (!categoryWaiting.NotificationStatus)  // Notifi là false
+                        {
+                            <div class="waiting-status">
+                                <div class="waiting-content">
+                                    Category <strong class="text-primary">@categoryWaiting.Name</strong> is awaiting confirmation.
+                                    <input type="hidden" name="id" value="@categoryWaiting.Id" />
+                                </div>
                             </div>
-                        </div>
+                        }
                     }
-                }
-            </div>
+                </div>
+            }
         </div>
     </div>
     <thead>
@@ -196,19 +196,27 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                @foreach (var category in Model.Where(c => c.Availability))  // Ava là true
+                @if (Model.Count(c => c.Availability && !c.NotificationStatus) == 0)
                 {
-                    @if (!category.NotificationStatus)  // Notifi là false
+                    <div class="notification-status">
+                        <p class="text-danger fw-bold">Not Notification about Category!!</p>
+                    </div>
+                } else
+                {
+                    @foreach (var category in Model.Where(c => c.Availability))  // Ava là true
                     {
-                        <div class="notification-status">
-                            <form asp-controller="Category" asp-action="ToggleNotification" method="post" class="form-notification">
-                                <div class="notification-content">
-                                    Category <strong>@category.Name</strong> has been confirmed.
-                                    <input type="hidden" name="id" value="@category.Id" />
-                                </div>
-                                <button type="submit" class="btn-close"></button>
-                            </form>
-                        </div>
+                        @if (!category.NotificationStatus)  // Notifi là false
+                        {
+                            <div class="notification-status">
+                                <form asp-controller="Category" asp-action="ToggleNotification" method="post" class="form-notification">
+                                    <div class="notification-content">
+                                        Category <strong>@category.Name</strong> has been confirmed.
+                                        <input type="hidden" name="id" value="@category.Id" />
+                                    </div>
+                                    <button type="submit" class="btn-close"></button>
+                                </form>
+                            </div>
+                        }
                     }
                 }
             </div>

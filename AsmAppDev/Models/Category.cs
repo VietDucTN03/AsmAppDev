@@ -10,8 +10,6 @@ namespace AsmAppDev.Models
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
-
-		[DisplayFormat(DataFormatString = "{0:dd/MM/yy}", ApplyFormatInEditMode = true)]
 		public DateTime DateCreate { get; set; }
 		public bool Availability { get; set; }
 
