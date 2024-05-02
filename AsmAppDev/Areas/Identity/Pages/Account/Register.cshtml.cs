@@ -132,6 +132,9 @@ namespace AsmAppDev.Areas.Identity.Pages.Account
                 user.Name = Input.Name;
                 user.Address = Input.Address;
                 user.City = Input.City;
+
+                user.Status = true;
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
